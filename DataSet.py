@@ -102,6 +102,7 @@ def SetAnswers():
         Answer text,
         Student int ,
         Assignment int,
+        Grade decimal defult null, 
         foreign key (Student) references Students(rowid) on delete cascade,
         foreign key (Assignment) references Assignments(rowid) on delete cascade
         );"""
