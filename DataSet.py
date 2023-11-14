@@ -6,20 +6,22 @@ def SetStudents():
         create table if not exists Students (
         UserName varchar(50) unique,
         FullName varchar(75),
-        PhoneNumber char(10),
-        email varchar(50),
+        PhoneNumber char(10) unique,
+        email varchar(50) unique,
+        password varchar(50),
         age int
     );"""
     c.execute(sqript)
     conn.commit()
-
+    
 def SetProfessors():
     sqript="""
         create table if not exists Professors(
         UserName varchar(50) unique,
         FullName varchar(75),
-        PhoneNumber char(10),
-        email varchar(50),
+        PhoneNumber char(10) unique,
+        email varchar(50) unique,
+        password varchar(50),
         age int
     );"""
     c.execute(sqript)
@@ -30,8 +32,9 @@ def SetTeachingAssistants():
         create table if not exists TeachingAssistants(
         UserName varchar(50) unique,
         FullName varchar(75),
-        PhoneNumber char(10),
-        email varchar(50),
+        PhoneNumber char(10) unique,
+        email varchar(50) unique,
+        password varchar(50),
         age int
     );"""
     c.execute(sqript)
