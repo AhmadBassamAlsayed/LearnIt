@@ -18,7 +18,7 @@ def Start():
     # select who are you 
     # 1 taecher
     # 2 prof 
-    # 3 stydent
+    # 3 student
     User=''
     Type=''
     to=Checker(1,3)
@@ -39,8 +39,9 @@ def Start():
     if   Where == 1:
         User.Login(Type)
     elif Where == 2:
-        User.register(Type)
+        User.Register(Type)
     else:
         quit()
     if User.ID==-1:
         Start()
+    

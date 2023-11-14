@@ -7,9 +7,9 @@ def SetStudents():
         UserName varchar(50) unique,
         FullName varchar(75),
         PhoneNumber char(10) unique,
-        email varchar(50) unique,
-        password varchar(50),
-        age int
+        Email varchar(50) unique,
+        Password varchar(50),
+        Age int
     );"""
     c.execute(sqript)
     conn.commit()
@@ -20,9 +20,9 @@ def SetProfessors():
         UserName varchar(50) unique,
         FullName varchar(75),
         PhoneNumber char(10) unique,
-        email varchar(50) unique,
-        password varchar(50),
-        age int
+        Email varchar(50) unique,
+        Password varchar(50),
+        Age int
     );"""
     c.execute(sqript)
     conn.commit()
@@ -33,9 +33,9 @@ def SetTeachingAssistants():
         UserName varchar(50) unique,
         FullName varchar(75),
         PhoneNumber char(10) unique,
-        email varchar(50) unique,
-        password varchar(50),
-        age int
+        Email varchar(50) unique,
+        Password varchar(50),
+        Age int
     );"""
     c.execute(sqript)
     conn.commit()
