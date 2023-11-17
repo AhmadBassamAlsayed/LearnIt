@@ -45,7 +45,7 @@ def SetCourses():
         Name varchar(50),
         Description text,
         CourseProf int,
-        foreign key (CourseProf) references Professors(rowid) on delete cascade 
+        foreign key (CourseProf) references Professors(rowid) on delete set null 
     );"""
     c.execute(sqript)
     conn.commit()
@@ -69,7 +69,7 @@ def SetAssistants():
         create table if not exists Assistants(
         Course int,
         Prof int,
-        foreign key (Course) references Courses(rowid) on delete cascade,
+        foreign key (Course) references Courses(rowid) on delete set null,
         foreign key (Prof) references TeachingAssistants(rowid) on delete cascade
         );"""
     c.execute(sqript)
@@ -93,8 +93,8 @@ def SetAssignments():
         Prof int ,
         Assistant int ,
         foreign key (Course) references Courses(rowid) on delete cascade,
-        foreign key (Prof) references Professors(rowid) on delete cascade ,
-        foreign key (Assistant) references TeachingAssistants(rowid) on delete cascade 
+        foreign key (Prof) references Professors(rowid) on delete set null ,
+        foreign key (Assistant) references TeachingAssistants(rowid) on delete set null 
         );"""
     c.execute(sqript)
     conn.commit()
