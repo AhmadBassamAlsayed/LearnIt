@@ -21,16 +21,16 @@ def Start():
     # 3 student
     User=''
     Type=''
-    to=Checker(1,3)
-    if(to == -1):
+    Who=Checker(1,3)
+    if(Who == -1):
         quit()
-    if (to == 2):
+    if (Who == 2):
         User = cls.Professor()
         Type='Professors'
-    elif(User == 1 ):
+    elif(Who == 1 ):
         User = cls.TeachingAssistants()
         Type='TeachingAssistants'
-    else :
+    elif (Who == 3) :
         User=cls.Student()
         Type='Students'
     # 1- login
@@ -40,10 +40,20 @@ def Start():
         User.Login(Type)
     elif Where == 2:
         User.Register(Type)
+        if User.ID!=-1:
+            # Do you want to login? 
+            # 1 - yes 
+            # 2 - no 
+            Where=Checker(1,2)
+            if (Where == 1 ):
+                User.Login()
+            else:
+                User.ID=-1
     else:
         quit()
     if User.ID==-1:
         Start()
-    
+    else:
+        User.UI
 
     

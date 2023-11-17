@@ -1,4 +1,5 @@
 import sqlite3 as sql
+import datetime
 conn =sql.connect("DataBase.dp")
 c=conn.cursor()
 class User:
@@ -25,45 +26,54 @@ class User:
             if UserName=='-1':
                 This.ID=-1
                 return
-            PassWord=input("Enter your PassWord:\n")
-            sqript=f"""select rowid,* from {Type} where (UserName= "{UserName}" or PhoneNumber = "{UserName}" or Email = "{UserName}") and PassWord = "{PassWord}";"""
+            Password=input("Enter your Password:\n")
+            sqript=f"""select rowid,* from {Type} where (UserName= "{UserName}" or PhoneNumber = "{UserName}" or Email = "{UserName}") and Password = "{Password}";"""
             c.execute(sqript)
-            data = c.fetchone()
-            if data == None:
-                print("unvaled UserName or PassWord.")
+            Data = c.fetchone()
+            if Data == None:
+                print("unvaled UserName or Password.")
             else:
-                This.Get(data)
+                This.Get(Data)
                 break
     def UniqueInput(This,Type,Attribute):
         while True:
-            Thing=input(f"Enter a unique {Attribute}:")
+            Thing=input(f"Enter a unique {Attribute} or -1 to cancle: ")
             sqript=f"select {Attribute} from {Type} where {Attribute} = {Thing};"
             c.execute(sqript)
-            if(c.fetchone()==None) :
+            if(Thing =='-1'or c.fetchone() == None) :
                 return Thing
             else :
                 print('Not valed please ',end ='')
 
     def Register(This,Type):
-        UserName=input("Enter a unique UserName:")
-        while True:
-            if This.Exists(Type,"UserName",UserName) == 1:
-                print ("Enter a valed UserName:")
-            else:
-                break
-        Email=input("Enter a unique Email:")
-        while True:
-            if This.Exists(Type,"Email",Email) == 1:
-                print ("Enter a valed Email:")
-            else:
-                break
+        FullName=input("Enter your Name or -1 to cancle: ")
+        if FullName=='-1':
+            This.ID = -1
+            return
+        UserName=This.UniqueInput(Type,"UserName")
+        if UserName =='-1':
+            This.ID = -1
+            return
+        Email=This.UniqueInput(Type,"Email")
+        if Email=='-1':
+            This.ID = -1
+            return
+        PhoneNumber=This.UniqueInput(Type,"PhoneNumber")
+        if PhoneNumber=='-1':
+            This.ID = -1
+            return
+        Password=input("Enter your Password or -1 to cancle: ")
+        if Password=='-1':
+            This.ID = -1
+            return
+        sqript=f"""insert into {Type} (FullName,UserName,PhoneNumber,Email,Password) values ("{FullName}","{UserName}","{PhoneNumber}","{Email}","{Password}")"""
+        c.execute(sqript)
+        conn.commit()
         
-            
         
-
 class Professor(User):
-
-
+    # what  
+ 
 class Student(User):
 
 

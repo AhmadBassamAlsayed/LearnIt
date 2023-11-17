@@ -8,8 +8,7 @@ def SetStudents():
         FullName varchar(75),
         PhoneNumber char(10) unique,
         Email varchar(50) unique,
-        Password varchar(50),
-        Age int
+        Password varchar(50)
     );"""
     c.execute(sqript)
     conn.commit()
@@ -21,8 +20,7 @@ def SetProfessors():
         FullName varchar(75),
         PhoneNumber char(10) unique,
         Email varchar(50) unique,
-        Password varchar(50),
-        Age int
+        Password varchar(50)
     );"""
     c.execute(sqript)
     conn.commit()
@@ -34,8 +32,7 @@ def SetTeachingAssistants():
         FullName varchar(75),
         PhoneNumber char(10) unique,
         Email varchar(50) unique,
-        Password varchar(50),
-        Age int
+        Password varchar(50)
     );"""
     c.execute(sqript)
     conn.commit()
@@ -94,7 +91,7 @@ def SetAssignments():
         Assistant int ,
         foreign key (Course) references Courses(rowid) on delete cascade,
         foreign key (Prof) references Professors(rowid) on delete set null ,
-        foreign key (Assistant) references TeachingAssistants(rowid) on delete set null 
+        foreign key (Assistant) references TeachingAssistants(rowid) on delete set null
         );"""
     c.execute(sqript)
     conn.commit()
