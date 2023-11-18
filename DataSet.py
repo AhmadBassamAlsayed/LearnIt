@@ -39,7 +39,7 @@ def SetTeachingAssistants():
 
 def SetCourses():
     sqript="""create table if not exists Courses(
-        Name varchar(50),
+        Name varchar(50),   
         Description text,
         CourseProf int,
         foreign key (CourseProf) references Professors(rowid) on delete set null 
@@ -86,9 +86,12 @@ def SetRegistrations():
 def SetAssignments():
     sqript="""
         create table if not exists Assignments(
+        Assignment text,
         Course int ,
         Prof int ,
         Assistant int ,
+        StartDate vatchar(10),
+        EndDate varchar(10),
         foreign key (Course) references Courses(rowid) on delete cascade,
         foreign key (Prof) references Professors(rowid) on delete set null ,
         foreign key (Assistant) references TeachingAssistants(rowid) on delete set null
@@ -102,19 +105,21 @@ def SetAnswers():
         Answer text,
         Student int ,
         Assignment int,
+        Date vatchar(10),
         Grade decimal defult null, 
         foreign key (Student) references Students(rowid) on delete cascade,
         foreign key (Assignment) references Assignments(rowid) on delete cascade
         );"""
     c.execute(sqript)
     conn.commit()
-    
 
 def SetDataBase():
 
     SetStudents()
     SetProfessors()
     SetTeachingAssistants()  
+
+
     SetCourses()
     SetInvitations()
     SetAssistants()

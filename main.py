@@ -54,6 +54,6 @@ def Start():
     if User.ID==-1:
         Start()
     else:
-        User.UI
+        User.UI()
 
-    
+Start()

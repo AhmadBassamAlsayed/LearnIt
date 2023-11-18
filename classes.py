@@ -1,5 +1,17 @@
 import sqlite3 as sql
 import datetime
+def Checker(num1,num2):
+    while True:
+        num=input(f'Enter a number [{num1},{num2}] or -1 to cancele:\n')
+        try:
+            num=int(num)
+            if (num>=num1 and num<=num2) or num==-1:
+                return num 
+            else :
+                print('Not valed')
+        except:
+            print('Not valed')
+
 conn =sql.connect("DataBase.dp")
 c=conn.cursor()
 class User:
@@ -10,7 +22,7 @@ class User:
     FullName=''
     PhoneNumber=''
     Age=0
-    def Get(This,Data):
+    def Fill(This,Data):
         This.ID=int(Data[0])
         This.Username=str(Data[1])
         This.FullName=str(Data[2])
@@ -19,7 +31,15 @@ class User:
         This.Password=str(Data[5])
         This.Age=int(Data[6])
     
-
+    def GetFromID(This,Type,RowID):
+        sqript=f"""select from {Type} rowid,* where rowid = {RowID}"""
+        c.execute(sqript)
+        Data=c.fetchone()
+        if Data == None:
+            This.ID=-1
+        else:
+            This.Fill(Data)
+            
     def Login(This,Type):
         while True:
             UserName=input("Enter your UserName/ PhoneNumber/ Email or -1 to cancle:\n")
@@ -33,8 +53,9 @@ class User:
             if Data == None:
                 print("unvaled UserName or Password.")
             else:
-                This.Get(Data)
+                This.Fill(Data)
                 break
+
     def UniqueInput(This,Type,Attribute):
         while True:
             Thing=input(f"Enter a unique {Attribute} or -1 to cancle: ")
@@ -70,10 +91,83 @@ class User:
         c.execute(sqript)
         conn.commit()
         
-        
+
 class Professor(User):
-    # what  
- 
+    Courses={}
+    def Fill(This):
+        
+    def UI(This):
+        
+        # what you want to do 
+        # 1- maneg courses
+        # 2- maneg assigments
+        # 3- maneg teaching assisters in your course
+        # 4- maneg answers 
+        # 5- 
+        To=-1
+        while To==-1:
+            To =Checker(1,4)
+            if To ==-1:
+                print('Not valed')
+        if To ==1:
+        elif To==2:
+
+        elif To==3:
+
+        elif To==4:
+
+class Answer:
+    ID=0
+    Text=''
+    Student=0 
+    Assignment=0
+    Date=0
+    Grade=-1
+    def Fill(This,Data):
+        This.ID=Data[0]
+        This.Text=Data[1]
+        This.Student=Data[3] 
+        This.Assignment=Data[4]
+        This.Date=datetime.datetime.strptime(Data[5],"%d-%m-%Y")
+        This.Grade=Data[6]
+
+class Assignments:
+    ID=0
+    Text=''
+    StartDate=0
+    EndDate=0
+    FromProf=0
+    FromTeach=0
+    FromCourse=0
+    def Fill(This,Data):
+        This.ID=int(Data[0])
+        This.Text=str(Data[1])
+        This.FromCourse=int(Data[2])
+        This.FromProf=int(Data[3])
+        This.FromTeach=int(Data[4])
+        This.StartDate=datetime.datetime.strptime(Data[5],"%d-%m-%Y")
+        This.EndDate=datetime.datetime.strptime(Data[6],"%d-%m-%Y")
+        # datetime_obj = datetime.datetime.strptime(date_string, date_format)
+
+class Course:
+    ID=0
+    Name=''
+    Description=''
+    CourseProf=0
+    Assignment=[]
+    def Fill(This,Data):
+        This.ID=Data[0]
+        This.Name=Data[1]
+        This.Description=Data[2]
+        This.CourseProf=Data[3]
+        sqript=f"""select rowid,* from Assignments where Course = {This.ID}"""
+        c.execute(sqript)
+        data=c.fetchall()
+        for i in range(len(data)):
+            obj=Assignments()
+            obj.Fill(data[obj])
+            This.Assignment.append(obj)
+
 class Student(User):
 
 
