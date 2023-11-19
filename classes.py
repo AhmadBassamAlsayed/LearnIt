@@ -93,28 +93,47 @@ class User:
         
 
 class Professor(User):
-    Courses={}
+    Courses=[]
     def Fill(This):
-        
+        sqript=f"""select rowid,* from Courses where CourseProf = {This.ID}"""
+        c.execute(sqript)
+        data=c.fetchall()
+        for i in range(len(data)):
+            opj=Course()
+            opj.Fill(data[i])
+            This.Courses.append(opj)
+
+    def CoursesViwe(This):
+        for i in range(len(This.Courses)):
+            # This.Courses[i].ProfSee()
+        # select a course or -1 to cancel
+        course=Checker(0,1000000000)
+        if course ==-1:
+            This.UI()
+        else:
+            l=-1
+            r=len(This.Courses)+1
+            while(l+1<r):
+                
     def UI(This):
         
         # what you want to do 
-        # 1- maneg courses
-        # 2- maneg assigments
-        # 3- maneg teaching assisters in your course
-        # 4- maneg answers 
-        # 5- 
+        # 1- see courses and maneg them
+        # 2- create a course
+        # 3- maneg teaching assisters in your courses
+        # 4-  
         To=-1
         while To==-1:
-            To =Checker(1,4)
+            To =Checker(1,3)
             if To ==-1:
                 print('Not valed')
         if To ==1:
-        elif To==2:
+            
+        # elif To==2:
 
-        elif To==3:
+        # elif To==3:
 
-        elif To==4:
+        # elif To==4:
 
 class Answer:
     ID=0
@@ -131,7 +150,7 @@ class Answer:
         This.Date=datetime.datetime.strptime(Data[5],"%d-%m-%Y")
         This.Grade=Data[6]
 
-class Assignments:
+class Assignment:
     ID=0
     Text=''
     StartDate=0
@@ -139,6 +158,7 @@ class Assignments:
     FromProf=0
     FromTeach=0
     FromCourse=0
+    Answers=[]
     def Fill(This,Data):
         This.ID=int(Data[0])
         This.Text=str(Data[1])
@@ -148,6 +168,13 @@ class Assignments:
         This.StartDate=datetime.datetime.strptime(Data[5],"%d-%m-%Y")
         This.EndDate=datetime.datetime.strptime(Data[6],"%d-%m-%Y")
         # datetime_obj = datetime.datetime.strptime(date_string, date_format)
+        sqript=f"""select rowid,* from Answers where Assignment ={This.ID}"""
+        c.execute(sqript)
+        data=c.fetchall()
+        for i in range(len(data)):
+            opj=Answer()
+            opj.Fill(data[i])
+            This.Answers.append(opj)
 
 class Course:
     ID=0
@@ -164,8 +191,8 @@ class Course:
         c.execute(sqript)
         data=c.fetchall()
         for i in range(len(data)):
-            obj=Assignments()
-            obj.Fill(data[obj])
+            obj=Assignment()
+            obj.Fill(data[i])
             This.Assignment.append(obj)
 
 class Student(User):
