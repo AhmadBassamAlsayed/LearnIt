@@ -16,9 +16,9 @@ def Checker(num1,num2):
 
 def Start():
     # select who are you 
-    # 1 taecher
-    # 2 prof 
-    # 3 student
+    # 1- taecher
+    # 2- prof 
+    # 3- student
     User=''
     Type=''
     Who=Checker(1,3)
