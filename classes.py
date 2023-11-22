@@ -168,7 +168,47 @@ class Professor(User):
                         This.SelectedCourse(Course)
 
         elif see==3:
-   
+            # 1- see Assignments
+            # 2- create assignments 
+            To =Checker(1,2,1)
+            if To ==-1:
+                This.SelectedCourse(Course)
+            elif To == 1:
+                if len(This.Courses[Course].Assignments)==0:
+                    # There are no Assignments here do you want to create
+                    # 1- yes
+                    # 2- no 
+                    Create=Checker(1,2,3)
+                    if Create==1:
+                        This.Courses[Course].CreateAssignment()
+                    else:
+                        This.SelectedCourse(Course)
+                else:
+                    This.Courses[Course].ViweAssignments()
+                    # select an Assignment
+                    Assignment=Checker(1,len(This.Courses[Course].Assignments),1)
+                    if Assignment==-1:
+                        This.SelectedCourse(Course)
+                    else:
+                        This.SelectedAssignment(Course,Assignment)
+            elif To ==2:
+                This.Courses[Course].CreateAssignment()
+                
+    def SelectedAssignment(This,Course,Assignment):
+        # 1- Change EndDate
+        # 2- Show Answers
+        # 3- Delete 
+        Do=Checker(1,3,1)
+        if Do==-1:
+            This.SelectedCourse(Course)
+        elif Do ==1:
+            This.Courses[Course].Assignments[Assignment].ChangeEndDate()
+        elif Do ==2:
+
+        elif Do ==3:
+            This.Courses[Course].Assignments[Assignment].Delete()
+        
+
     def SeeCourses(This):
         if(len(This.Courses))==0:
             # You don't have any courses
@@ -327,7 +367,6 @@ class Course:
         c.execute(sqript)
         conn.commit()
             
-
     def Delete(This):
         sqript=f"""delete from Courses where rowid = {This.ID}"""
         c.execute(sqript)
