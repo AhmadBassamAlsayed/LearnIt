@@ -1,38 +1,25 @@
 import sqlite3 as sql
 conn =sql.connect("DataBase.dp")
 c=conn.cursor()
-def SetStudents():
+def SetUsers():
     sqript="""
-        create table if not exists Students (
+        create table if not exists Users (
         UserName varchar(50) unique,
         FullName varchar(75),
-        PhoneNumber char(10) unique,
         Email varchar(50) unique,
-        Password varchar(50)
-    );"""
-    c.execute(sqript)
-    conn.commit()
-    
-def SetProfessors():
-    sqript="""
-        create table if not exists Professors(
-        UserName varchar(50) unique,
-        FullName varchar(75),
-        PhoneNumber char(10) unique,
-        Email varchar(50) unique,
-        Password varchar(50)
+        Password varchar(50),
+        Position char(1)
     );"""
     c.execute(sqript)
     conn.commit()
 
-def SetTeachingAssistants():
-    sqript="""
-        create table if not exists TeachingAssistants(
-        UserName varchar(50) unique,
-        FullName varchar(75),
-        PhoneNumber char(10) unique,
-        Email varchar(50) unique,
-        Password varchar(50)
+def SetMessages():
+    sqript="""create table if not exists Messages(
+        FromWho int,
+        ToWho int,
+        Message text
+        foreign key (FromWho) references Users(rowid) on delete cascade 
+        foreign key (ToWho) references Users(rowid) on delete cascade 
     );"""
     c.execute(sqript)
     conn.commit()
@@ -42,7 +29,7 @@ def SetCourses():
         Name varchar(50),   
         Description text,
         CourseProf int,
-        foreign key (CourseProf) references Professors(rowid) on delete set null 
+        foreign key (CourseProf) references Users(rowid) on delete set null 
     );"""
     c.execute(sqript)
     conn.commit()
@@ -51,12 +38,12 @@ def SetInvitations():
     sqript="""
         create table if not exists Invitations(
         Massege text,
-        Prof int,
+        Professor int,
         Course int ,
         TeachingAssistant int,
-        foreign key (Prof) references Professors(rowid) on delete cascade ,
+        foreign key (Professor) references Users(rowid) on delete cascade ,
         foreign key (Course) references Courses(rowid) on delete cascade ,
-        foreign key (TeachingAssistant) references TeachingAssistants(rowid) on delete cascade 
+        foreign key (TeachingAssistant) references Users(rowid) on delete cascade 
         );"""
     c.execute(sqript)
     conn.commit()
@@ -67,7 +54,7 @@ def SetAssistants():
         Course int,
         Teacher int,
         foreign key (Course) references Courses(rowid) on delete set null,
-        foreign key (Teacher) references TeachingAssistants(rowid) on delete cascade
+        foreign key (Teacher) references Users(rowid) on delete cascade
         );"""
     c.execute(sqript)
     conn.commit()
@@ -77,7 +64,7 @@ def SetRegistrations():
         create table if not exists Registrations(
         Student int,
         Course int,
-        foreign key (Student) references Students(rowid) on delete cascade,
+        foreign key (Student) references Users(rowid) on delete cascade,
         foreign key (Course) references Courses(rowid) on delete cascade
         );"""
     c.execute(sqript)
@@ -88,13 +75,11 @@ def SetAssignments():
         create table if not exists Assignments(
         Assignment text,
         Course int,
-        Prof int,
-        Assistant int ,
+        Creater int,
         StartDate vatchar(10),
         EndDate varchar(10),
         foreign key (Course) references Courses(rowid) on delete cascade,
-        foreign key (Prof) references Professors(rowid) on delete set null ,
-        foreign key (Assistant) references TeachingAssistants(rowid) on delete set null
+        foreign key (Creater) references Users(rowid) on delete set null 
         );"""
     c.execute(sqript)
     conn.commit()
@@ -106,9 +91,10 @@ def SetAnswers():
         Student int,
         Assignment int,
         Registration int,
-        Date vatchar(10),
-        Grade decimal defult null, 
-        foreign key (Student) references Students(rowid) on delete cascade,
+        SubmitDate vatchar(10),
+        Grade decimal default null,
+        GradeMessage Text,
+        foreign key (Student) references Users(rowid) on delete cascade,
         foreign key (Registration) references Registrations(rowid) on delete cascade,
         foreign key (Assignment) references Assignments(rowid) on delete cascade
         );"""
@@ -117,14 +103,11 @@ def SetAnswers():
 
 def SetDataBase():
 
-    SetStudents()
-    SetProfessors()
-    SetTeachingAssistants()  
-
-
+    SetUsers()
     SetCourses()
     SetInvitations()
     SetAssistants()
     SetRegistrations()
     SetAssignments()
     SetAnswers()
+    SetMessages()
