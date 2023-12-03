@@ -13,7 +13,7 @@ def Checker(num1,num2,cancle):
     else:
         c1=''
     while True:
-        num=input(f'Enter a number [{num1},{num2}]{c1}:\n')
+        num=input(f'Enter a number [{(num1)},{(num2)}]{(c1)}:\n')
         try:
             num=int(num)
             if (num>=num1 and num<=num2) or (num==-1 and b1) :
@@ -29,7 +29,7 @@ def Login():
         if UserName=='-1':
             return -1
         Password=input("Enter your Password:\n")
-        sqript=f"""select rowid,* from Users where (UserName= "{UserName}" or Email = "{UserName}") and Password = "{Password}";"""
+        sqript=f"""select rowid,* from Users where (UserName= "{(UserName)}" or Email = "{(UserName)}") and Password = "{(Password)}";"""
         c.execute(sqript)
         Data = c.fetchone()
         if Data == None:
@@ -47,8 +47,8 @@ def Login():
 
 def UniqueInput(Attribute):
     while True:
-        Thing=input(f"Enter a unique {Attribute}: ")
-        sqript=f"select {Attribute} from Users where {Attribute} = {Thing};"
+        Thing=input(f"Enter a unique {(Attribute)}: ")
+        sqript=f"select {(Attribute)} from Users where {(Attribute)} = {(Thing)};"
         c.execute(sqript)
         if(c.fetchone() == None) :
             return Thing
@@ -71,7 +71,7 @@ def Register():
     UserName=UniqueInput("UserName")
     Email=UniqueInput("Email")
     Password=input("Enter your Password or -1 to cancle: ")
-    sqript=f"""insert into Users (FullName,UserName,Email,Password,Position) values ("{FullName}","{UserName}","{Email}","{Password}","{Position}")"""
+    sqript=f"""insert into Users (FullName,UserName,Email,Password,Position) values ("{(FullName)}","{(UserName)}","{(Email)}","{(Password)}","{(Position)}")"""
     c.execute(sqript)
     conn.commit()
 
