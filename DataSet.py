@@ -17,7 +17,7 @@ def SetMessages():
     sqript="""create table if not exists Messages(
         FromWho int,
         ToWho int,
-        Message text
+        Message text,
         foreign key (FromWho) references Users(rowid) on delete cascade 
         foreign key (ToWho) references Users(rowid) on delete cascade 
     );"""
@@ -37,7 +37,7 @@ def SetCourses():
 def SetInvitations():
     sqript="""
         create table if not exists Invitations(
-        Massege text,
+        Message text,
         Professor int,
         Course int ,
         TeachingAssistant int,
@@ -76,8 +76,8 @@ def SetAssignments():
         Assignment text,
         Course int,
         Creater int,
-        StartDate vatchar(10),
-        EndDate varchar(10),
+        StartDate varchar(30),
+        EndDate varchar(30),
         foreign key (Course) references Courses(rowid) on delete cascade,
         foreign key (Creater) references Users(rowid) on delete set null 
         );"""
@@ -91,9 +91,9 @@ def SetAnswers():
         Student int,
         Assignment int,
         Registration int,
-        SubmitDate vatchar(10),
+        SubmitDate varchar(30),
         Grade decimal default null,
-        GradeMessage Text,
+        GradeMessage Text default null,
         foreign key (Student) references Users(rowid) on delete cascade,
         foreign key (Registration) references Registrations(rowid) on delete cascade,
         foreign key (Assignment) references Assignments(rowid) on delete cascade
@@ -103,6 +103,7 @@ def SetAnswers():
 
 def SetDataBase():
 
+    # print("-----------------")
     SetUsers()
     SetCourses()
     SetInvitations()
