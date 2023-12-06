@@ -594,7 +594,7 @@ class Assignment:
         print(f"Creater: {str(This.FromName)}\nStartDate: {str(This.StartDate)}\nEndDate: {str(This.EndDate)}\n{str(This.Text)}")
 
     def NotGradedAnswers(This,User):
-        Data=FetchFromData("Answers"," rowid,* ",2,f"""Assignment = {str(This.ID)} and Grade = -1 and SubmitDate !="2000-01-01 00:00:00" """ )
+        Data=FetchFromData("Answers"," rowid,* ",2,f"""Assignment = {str(This.ID)} and Grade = -1 and SubmitDate !="2000-01-01 00:00:00" and SubmitDate !="2000-1-1 00:00:00"  """ )
         Answers=[]
         # print(This.ID)
         if len(Data)==0:
@@ -617,7 +617,7 @@ class Assignment:
             Answers[AnswerID].NotGraded(User)
      
     def GradedAnswers(This,User):
-        Data=FetchFromData("Answers"," rowid,* ",2,f"""Assignment = {str(This.ID)} and SubmitDate != "2000-01-01 00:00:00" and Grade != -1  """ )
+        Data=FetchFromData("Answers"," rowid,* ",2,f"""Assignment = {str(This.ID)} and SubmitDate != "2000-01-01 00:00:00" and SubmitDate !="2000-1-1 00:00:00" and Grade != -1  """ )
         Answers=[]
         if len(Data)==0:
             input("Empty")
