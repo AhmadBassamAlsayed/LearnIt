@@ -4,7 +4,9 @@ import sqlite3 as sql
 DataSet.SetDataBase()
 conn =sql.connect("DataBase.dp")
 c=conn.cursor()
-
+# sqript=f"""select rowid,* from Answers """
+# c.execute(sqript)
+# print(c.fetchall())
 def Checker(num1,num2,cancle):
     c1=" or -1 to cancele"
     b1=False
@@ -38,9 +40,9 @@ def Login():
             User=classes.User()
             if Data[5]=='P':
                 User=classes.Professor()
-            elif Data[5]=='S':
-                User=classes.TeachingAssistants()
             elif Data[5]=='T':
+                User=classes.TeachingAssistants()
+            elif Data[5]=='S':
                 User=classes.Student()
             User.Fill(Data)
             return User
@@ -71,6 +73,8 @@ def Register():
     UserName=UniqueInput("UserName")
     Email=UniqueInput("Email")
     Password=input("Enter your Password or -1 to cancle: ")
+    if Password=="-1":
+        return
     sqript=f"""insert into Users (FullName,UserName,Email,Password,Position) values ("{str(FullName)}","{str(UserName)}","{str(Email)}","{str(Password)}","{str(Position)}")"""
     c.execute(sqript)
     conn.commit()

@@ -54,6 +54,25 @@ class User:
     FullName=''
     Position=''
 
+    def Delete(This):
+        sqript=f"""delete from Users where rowid = {This.ID}"""
+        c.execute(sqript)
+        conn.commit()
+        
+        sqript=f"""delete from Invitations where Professor = {This.ID} or Professor = {This.ID}"""
+        c.execute(sqript)
+        conn.commit()
+        
+        sqript=f"""delete from Answers where Student = {This.ID}"""
+        c.execute(sqript)
+        conn.commit()
+
+        sqript=f"""delete from Messages where FromWho = {This.ID} or ToWho = {This.ID}"""
+        c.execute(sqript)
+        conn.commit()
+
+        
+
     def InBoX(This):
         while True:
             Data=FetchFromData("Messages","rowid,*",2,f"ToWho = {str(This.ID)} ")
@@ -70,6 +89,8 @@ class User:
                     print("----------------------------------------------------------------")
                     print(f"{str(i+1)}-\n")
                     Messages[i].Viwe()
+                    print("----------------------------------------------------------------")
+                    
                 print(" select a Message")
                 ThisMessage=Checker(1,len(Messages),1)
                 if ThisMessage==-1:
@@ -84,6 +105,7 @@ class User:
                             break
                         elif Choise==1:
                             Messages[MessageIndex].Delete()
+                            break
                         elif Choise==2:
                             This.CreateMessage(Messages[MessageIndex].FromWho)
 
@@ -117,6 +139,7 @@ class User:
                             break
                         elif Choise==1:
                             Messages[MessageIndex].Delete()
+                            break
                         elif Choise==2:
                             This.CreateMessage(Messages[MessageIndex].ToWho)
 
@@ -130,7 +153,11 @@ class User:
     
     def CreateMessage(This,To):
         Text=input("Enter The Message")
-        InsertIntoData("Messages"," FrommWho, ToWho, Message",f"""{str(This.ID)},{str(To)},"{str(Text)}" """)
+        if FetchFromData("Users","UserName",1,f"rowid = {To}")==None:
+            print("Deleted Account")
+            return
+
+        InsertIntoData("Messages"," FromWho, ToWho, Message",f"""{str(This.ID)},{str(To)},"{str(Text)}" """)
         
 class Message:
     ID=0
@@ -147,7 +174,12 @@ class Message:
         This.FromWho=Data[1]
         cur=FetchFromData("Users","UserName,Position",1,f"rowid = {str(This.FromWho)}")
         This.FromName=cur[0]
-        This.FromType=cur[1]
+        if cur[1]=='T':
+            This.FromType="Teacher"
+        if cur[1]=='P':
+            This.FromType="Professor"
+        if cur[1]=='S':
+            This.FromType="Student"
         This.ToWho=Data[2]
         cur=FetchFromData("Users","UserName,Position",1,f"rowid = {str(This.ToWho)}")
         This.ToName=cur[0]
@@ -182,7 +214,10 @@ class Professor(User):
     
     def CreateInvite(This,Course):
         AvTeachers=[]
-        sqript=f"""select rowid,UserName from Users where Position = "T" and not exists (select * from Invitations where TeachingAssistant = Users.rowid)"""
+        sqript=f"""select rowid,UserName from Users where Position = "T" and not exists 
+        (select * from Invitations where TeachingAssistant = Users.rowid and Course = {Course.ID})
+        and not exists
+        (select * from Assistants where Teacher = Users.rowid and Course = {Course.ID});"""
         c.execute(sqript)
         AvTeachers=c.fetchall()
         for i in range(len(AvTeachers)):
@@ -298,7 +333,7 @@ class Professor(User):
 
     def ShowAssignments(This,Course):
         while True:
-            Data=Course.Assignments()
+            Data =FetchFromData("Assignments","rowid,*" ,2,f"Course = {str(Course.ID)} ")
             if len(Data)==0:
                 input("Empty")
                 return
@@ -310,16 +345,16 @@ class Professor(User):
                     Assignments.append(opj)
                 for i in range(len(Assignments)):
                     print ("----------------------------------------------------------------")
-                    print(f"{str(i+1)}-\n")
+                    print(f"{str(i+1)}-")
                     Assignments[i].Viwe()
                     print ("----------------------------------------------------------------")
-                    print(" select an Assignment")
-                    ThisAssignment=Checker(1,len(Assignments),1)
-                    if ThisAssignment==-1:
-                        return
-                    else:
-                        AssignmentID=ThisAssignment-1
-                        This.SelectedAssignment(Assignments[AssignmentID])
+                print(" select an Assignment")
+                ThisAssignment=Checker(1,len(Assignments),1)
+                if ThisAssignment==-1:
+                    return
+                else:
+                    AssignmentID=ThisAssignment-1
+                    This.SelectedAssignment(Assignments[AssignmentID])
 
     def SelectedCourse(This,Course):
         while True:
@@ -412,6 +447,7 @@ class Professor(User):
                             Cancle=Checker(1,2,3)
                             if Cancle==1:
                                 ThisInvitation.Cancle()
+                                return
     
     def UI(This):
         while True:
@@ -422,7 +458,8 @@ class Professor(User):
             print(" 4- Inbox")
             print(" 5- OutBox ")
             print(" 6- loge out")
-            To =Checker(1,6,2)
+            print(" 7- Delete account")
+            To =Checker(1,7,2)
             if To ==1:
                 This.SeeCourses()
             elif To==2:
@@ -435,6 +472,9 @@ class Professor(User):
                 This.OutBox()
             elif To == 6:
                 return
+            elif To==7:
+                This.Delete()
+                return
             
 class Answer:
     ID=0
@@ -442,10 +482,20 @@ class Answer:
     Student=0 
     Assignment=0
     Registration=0
-    SubmitDate=0
+    SubmitDate=None
     Grade=-1
-    StudentName=0
+    StudentName="DeletedAccount"
     GradeMessage=''
+
+    def Submit(This):
+        Date=datetime.strptime(FetchFromData("Assignments","EndDate",1,f"rowid = {str(This.Assignment)}")[0],"%Y-%m-%d %H:%M:%S")
+        now = datetime.now()
+        if now<=Date:
+            sqript=f"""update Answers set SubmitDate = "{now.strftime("%Y-%m-%d %H:%M:%S")}"  """
+            c.execute(sqript)
+            conn.commit()
+        else:
+            input("sorry there is no Time ); ")
 
     def Fill(This,Data):
         This.ID=Data[0]
@@ -456,14 +506,15 @@ class Answer:
         This.SubmitDate=datetime.strptime(Data[5],"%Y-%m-%d %H:%M:%S")
         This.Grade=Data[6]
         This.GradeMessage=Data[7]
-        This.StudentName=FetchFromData("Users"," UserName ",1,f"""rowid = {str(This.Student)}""")
+        if FetchFromData("Users"," UserName ",1,f"""rowid = {str(This.Student)}""")!=None:
+            This.StudentName=FetchFromData("Users"," UserName ",1,f"""rowid = {str(This.Student)}""")[0]
     
     def Viwe(This):
         print(f"From: {str(This.StudentName)}\nDate: {str(This.SubmitDate)}\nAnswer:\n{str(This.Text)}")
         if This.Grade==-1:
             print("Not Graded")
         else:
-            print(f"Grade: {str(This.Grade)}/10")
+            print(f"Grade: {str(This.Grade)}/10 \nMessage: {This.GradeMessage}")
     
     def MakeGrade(This):
         print(" Enter The grade")
@@ -472,7 +523,10 @@ class Answer:
             return
         else:
             This.Grade=Grade
-            sqript=f"""update Answers set Grade = {str(This.Grade)} WHERE rowid = {str(This.ID)};"""
+            Message=input("Enter The MEssage")
+            if Message=='':
+                Message="NO MEssage!?"
+            sqript=f"""update Answers set Grade = {str(This.Grade)}, GradeMessage = "{str(Message)}" WHERE rowid = {str(This.ID)};"""
             c.execute(sqript)
             conn.commit()
     
@@ -485,6 +539,7 @@ class Answer:
                 return
             elif Choise==1:
                 This.MakeGrade()
+                break
             elif Choise==2:
                 User.CreateMessage(This.Student)
     
@@ -506,7 +561,7 @@ class Assignment:
     StartDate=''
     EndDate=''
     FromID=0
-    FromName=''
+    FromName="DeletedAccount"
     FromCourse=0
     
     def Fill(This,Data):
@@ -516,42 +571,41 @@ class Assignment:
         This.FromID=Data[3]
         This.StartDate=datetime.strptime(Data[4],"%Y-%m-%d %H:%M:%S")
         This.EndDate=datetime.strptime(Data[5],"%Y-%m-%d %H:%M:%S")
-        This.FromName=FetchFromData("Users"," UserName ",1,f"""rowid = {str(This.FromID)}""")[0]
+        if FetchFromData("Users"," UserName ",1,f"""rowid = {str(This.FromID)}""")!=None:
+            This.FromName=FetchFromData("Users"," UserName ",1,f"""rowid = {str(This.FromID)}""")[0]
 
     def CreateAssignment(This,FromID,FromCourse):
         Text=input("Enter The Assignment and Press \'Enter\' to conferm it and DONT USE (\") :\n")
         StartDate=datetime.now()
         StartDate=datetime.strptime(StartDate.strftime('%Y-%m-%d %H:%M:%S'),'%Y-%m-%d %H:%M:%S')
         EndDate=StartDate
-        while StartDate>EndDate:
+        while StartDate>=EndDate:
             Date=input("Enter The end date in format (YYYY-MM-DD) and it has to be at les tommorow: ")
             try:
                 EndDate=datetime.strptime(Date,'%Y-%m-%d')
-                print(EndDate)
-                print(StartDate)
             except:
+                print("Error")
                 continue
-        print(StartDate<=EndDate)
-        # print(StartDate)
-        # print(EndDate)
         sqript=f"""insert into Assignments (Assignment,Course,Creater,StartDate,EndDate) values ("{str(Text)}",{str(FromCourse)},{str(FromID)},"{str(StartDate)}","{str(EndDate)}")"""
         c.execute(sqript)
         conn.commit()
     
     def Viwe(This):
-        print(f"Creater: {str(This.FromName)}\nStartDate: {str(This.StartDate)}\nEndDate: {str(This.EndDate)}\n{str(This.Text)}\n")
+        print(f"Creater: {str(This.FromName)}\nStartDate: {str(This.StartDate)}\nEndDate: {str(This.EndDate)}\n{str(This.Text)}")
 
     def NotGradedAnswers(This,User):
-        Data=FetchFromData("Answers"," rowid,* ",2,f"""Assignment = {str(This.ID)} and SubmitDate != "00-00-0000" and Greade = Null """ )
+        Data=FetchFromData("Answers"," rowid,* ",2,f"""Assignment = {str(This.ID)} and Grade = -1 and SubmitDate !="2000-01-01 00:00:00" """ )
         Answers=[]
+        # print(This.ID)
         if len(Data)==0:
             input("Empty")
             return
-        for i in Data:
+        for i in range(len(Data)):
             opj=Answer()
-            opj.Fill(i)
+            opj.Fill(Data[i])
             Answers.append(opj)
             print ("----------------------------------------------------------------")
+            print(f"{str(i+1)}-")
             opj.Viwe()
             print ("----------------------------------------------------------------")
         print(" select an Answer")
@@ -561,26 +615,27 @@ class Assignment:
         else:
             AnswerID=ThisAnswer-1
             Answers[AnswerID].NotGraded(User)
-        
+     
     def GradedAnswers(This,User):
-        Data=FetchFromData("Answers"," rowid,* ",2,f"""Assignment = {str(This.ID)} and SubmitDate != "00-00-0000" and Greade != Null """ )
+        Data=FetchFromData("Answers"," rowid,* ",2,f"""Assignment = {str(This.ID)} and SubmitDate != "2000-01-01 00:00:00" and Grade != -1  """ )
         Answers=[]
         if len(Data)==0:
             input("Empty")
             return
-        for i in Data:
+        for i in range(len(Data)):
             opj=Answer()
-            opj.Fill(i)
+            opj.Fill(Data[i])
             Answers.append(opj)
             print ("----------------------------------------------------------------")
+            print(f"{str(i+1)}-")
             opj.Viwe()
             print ("----------------------------------------------------------------")
         print(" select an Answer")
-        Answer=Checker(1,len(Answers),1)
-        if Answer==-1:
+        ThisAnswer=Checker(1,len(Answers),1)
+        if ThisAnswer==-1:
             return
         else:
-            AnswerID=Answer-1
+            AnswerID=ThisAnswer-1
             Answers[AnswerID].Graded(User)
                 
     def Delete(This):
@@ -592,6 +647,10 @@ class Assignment:
         conn.commit()
 
     def ExtraTime(This):
+        now = datetime.now()
+        if This.EndDate <now:
+            input("sorry now Time );")
+            return
         Time=0
         while Time<=0:
             Time=input("Enter a positiv Number or -1 to cancle")
@@ -599,11 +658,15 @@ class Assignment:
                 return
             try:
                 Time=int(Time)
+
             except:
+                Time=0
                 continue
+        NewEndDate=datetime.now()
         NewEndDate = This.EndDate + timedelta(Time)
         This.EndDate=NewEndDate
-        sqript=f"""update Assignments set EndDate = {str(NewEndDate)} where rowid = {str(This.ID)}"""
+        sqript=f"""update Assignments set EndDate = "{str(NewEndDate)}" where rowid = {str(This.ID)}"""
+        # print (sqript)
         c.execute(sqript)
         conn.commit()
 
@@ -645,13 +708,9 @@ class Course:
         sqript=f"""delete from Assignments where Course = {str(This.ID)}"""
         c.execute(sqript)
         conn.commit()
-        sqript=f"""delete from Assignments where Course = {str(This.ID)}"""
+        sqript=f"""delete from Invitations where Course = {str(This.ID)}"""
         c.execute(sqript)
         conn.commit()
-    
-    def Assignments(This):
-        Data =FetchFromData("Assignments","rowid,*" ,2,f"Course = {str(This.ID)} ")
-        return Data
 
 class Student(User):
 
@@ -660,62 +719,59 @@ class Student(User):
             Text=input("enter The Answer:\n")
             if len(Text)!=0:
                 break
-        # do you want to supmit it?
-        # 1- yes
-        # 2- no 
+        print(" do you want to supmit it?")
+        print(" 1- yes")
+        print(" 2- no ")
         Choise=Checker(1,2,3)
+        # print(f"Student = {str(This.ID)} and Course = {str(ThisAssignmet.FromCourse)}")
+        # print(FetchFromData("Registrations","rowid",1,f"Student = {str(This.ID)} and Course = {str(ThisAssignmet.FromCourse)}"))
+        regesteration=FetchFromData("Registrations","rowid",1,f"Student = {str(This.ID)} and Course = {str(ThisAssignmet.FromCourse)}")[0]
+        InsertIntoData("Answers"," Answer, Student, Assignment, Registration ",f""" "{Text}",{str(This.ID)},{str(ThisAssignmet.ID)},{str(regesteration)} """)
         if Choise==1:
-            regesteration=FetchFromData("Registrations","rowid",1,f"Student = {str(This.ID)} and Course = {str(ThisAssignmet.FromID)}")
-            today=datetime.now()
-            today=today.strftime(("%Y-%m-%d %H:%M:%S"))
-            InsertIntoData("Answers"," Answer, Student, Assignment, Registration, SubmitDate ",f""" "{Text}",{str(This.ID)},{str(ThisAssignmet.ID)},{str(regesteration)},{str(today)} """)
-        else:
-            regesteration=FetchFromData("Registrations","rowid",1,f"Student = {str(This.ID)} and Course = {str(ThisAssignmet.FromID)}")
-            InsertIntoData("Answers"," Answer, Student, Assignment, Registration ",f""" "{Text}",{str(This.ID)},{str(ThisAssignmet.ID)},{str(regesteration)} """)
+            Data=FetchFromData("Answers","rowid,*",1,f"Student = {str(This.ID)} and Assignment = {str(ThisAssignmet.ID)}")
+            MyAnswer=Answer()
+            MyAnswer.Fill(Data)
+            MyAnswer.Submit()
 
     def SelectedAssignment(This,ThisAssignment):
         while True:
-            Data = FetchFromData("Assignments","rowid,*",1,f" Assignment = {ThisAssignment.ID} and Student = {This.ID} ")
+            Data = FetchFromData("Answers","rowid,*",1,f" Assignment = {ThisAssignment.ID} and Student = {This.ID} ")
             if Data == None:
-                # do you want to answer?
-                # 1- yes
-                # 2- no
-                Choise==Checker(1,2,3)
-                if Choise==1:
+                print(" do you want to answer?")
+                print(" 1- yes")
+                print(" 2- no")
+                choise=Checker(1,2,3)
+                if choise==1:
                     This.MakeAnswer(ThisAssignment)
                 else:
                     return
             else:
                 MyAnswer = Answer()
                 MyAnswer.Fill(Data)
-                
-                if MyAnswer.SubmitDate.strftime("%d-%m-%Y")=="00-00-0000":
-                    # do you want to submit?
-                    # 1- yes
-                    # 2- no 
-                    Choise=Checker(1,2,3)
-                    if Choise==1:
-                        today=datetime.now()
-                        today=today.strftime("%Y-%m-%d %H:%M:%S")
-                        sqript=f""" update Answers Set SubmitDate = "{today}" where rowid = {str(MyAnswer.ID)}"""
-                        c.execute(sqript)
-                        conn.commit()
+                # print(MyAnswer.SubmitDate)
+                if MyAnswer.SubmitDate.strftime("%Y-%m-%d %H:%M:%S")=="2000-01-01 00:00:00":
+                    print(" do you want to submit?")
+                    print(" 1- yes")
+                    print(" 2- no ")
+                    choise=Checker(1,2,3)
+                    if choise==1:
+                        MyAnswer.Submit()
                     return
                 else:
-                    if MyAnswer.Grade== None:
-                        # not Graded yet
+                    if MyAnswer.Grade== -1:
+                        input(" not Graded yet")
                         return
                     else:
-                        # Your Grage is:
+                        print(" Your Grage is:")
                         print(MyAnswer.Grade,end=f"/10\nMessage: {MyAnswer.GradeMessage}\n")
 
     def CourseTeachers(This,Course):
         while True:
-            sqript=f""" select rowid,UserName from Users where exists (select * from Assistants Where Teacher = Users.rowid and Course={str(Course.ID)} And rowid != {str(This.ID)}); """
+            sqript=f""" select rowid,UserName from Users where exists (select * from Assistants Where Teacher = Users.rowid and Course={str(Course.ID)}); """
             c.execute(sqript)
             Teachers=c.fetchall()
             if len(Teachers)==0:
-                input("only you")
+                input("Empty")
                 return
             for i in range(len(Teachers)):
                 print("----------------------------------------------------------------")
@@ -737,7 +793,7 @@ class Student(User):
         
     def CourseStudents(This,Course):
         while True:
-            sqript=f""" select rowid,UserName from Users where exists (select * from Registrations Where Student = Users.rowid and Course = {str(Course.ID)}); """
+            sqript=f""" select rowid,UserName from Users where exists (select * from Registrations Where Student = Users.rowid and Course = {str(Course.ID)} and Student != {str(This.ID)}); """
             c.execute(sqript)
             Students=c.fetchall()
             if len(Students)==0:
@@ -763,10 +819,10 @@ class Student(User):
 
     def MyCourses(This):
         while True:
-            sqript=f"""select fro Courses where exists(select * from Registrations where Course = Courses.rowid and Student = {This.ID});"""
+            sqript=f"""select rowid,* from Courses where exists(select * from Registrations where Course = Courses.rowid and Student = {This.ID});"""
             c.execute(sqript)
             Data=c.fetchall()
-            if len(Data==0):
+            if len(Data)==0:
                 input("Empty")
                 return
             Courses=[]
@@ -778,26 +834,27 @@ class Student(User):
                 opj.Viwe()
                 print("----------------------------------------------------------------")
                 Courses.append(opj)
-            # select a Course
+            print(" select a Course")
             CourseID=Checker(1,len(Courses),1)
             if CourseID==-1:
                 return
             else:
                 while True:
                     ThisCourse=Courses[CourseID-1]
-                    # 1- get OUT
-                    # 2- See Assignments
-                    # 3- See Students
-                    # 4- See Teachers
-                    # 5- Message The Professor 
+                    print(" 1- get OUT")
+                    print(" 2- See Assignments")
+                    print(" 3- See Students")
+                    print(" 4- See Teachers")
+                    print(" 5- Message The Professor ")
                     Choise=Checker(1,5,1)
                     if Choise==-1:
                         return
                     elif Choise==1:
                         ThisCourse.KickStudent(This.ID)
+                        break
                     elif Choise==2:
                         while True:
-                            Data=ThisCourse.Assignments()
+                            Data =FetchFromData("Assignments","rowid,*" ,2,f"Course = {str(ThisCourse.ID)} ")
                             Assignments=[]
                             for i in range(len(Data)):
                                 opj=Assignment()
@@ -805,8 +862,9 @@ class Student(User):
                                 print("----------------------------------------------------------------")
                                 print(f"{i+1}-")
                                 opj.Viwe()
+                                Assignments.append(opj)
                                 print("----------------------------------------------------------------")
-                            # Select a Assignment
+                            print(" Select a Assignment")
                             AssignmentID=Checker(1,len(Assignments),1)
                             if AssignmentID==-1:
                                 break
@@ -822,15 +880,14 @@ class Student(User):
     
     def UI(This):
         while True:
-            # 1- my Courses
-            # 2- register in a Course
-            # 3- InBox 
-            # 4- OutBox
-            # 5- logout 
-            Choise=Checker(1,5,1)
-            if Choise==-1:
-                return
-            elif Choise==1:
+            print(" 1- my Courses")
+            print(" 2- register in a Course")
+            print(" 3- InBox ")
+            print(" 4- OutBox")
+            print(" 5- logout ")
+            print(" 6- Delete Account ")
+            Choise=Checker(1,6,2)
+            if Choise==1:
                 This.MyCourses()
             elif Choise==2:
                 while True:
@@ -849,7 +906,7 @@ class Student(User):
                         opj.Viwe()
                         Courses.append(opj)
                         print("----------------------------------------------------------------")
-                    # select a COurse
+                    print(" select a COurse")
                     CourseID=Checker(1,len(Data),1)
                     if CourseID==-1:
                         break
@@ -863,6 +920,9 @@ class Student(User):
             elif Choise==4:
                 This.OutBox()
             elif Choise==5:
+                return
+            elif Choise==6:
+                This.Delete()
                 return
 
 class TeachingAssistants(User):
@@ -897,14 +957,16 @@ class TeachingAssistants(User):
                         break
                     elif Choise==1:
                         ThisInvitation.Confirm()
+                        break
                     elif Choise==2:
                         ThisInvitation.Cancle()
+                        break
                     elif Choise==3:
                         This.CreateMessage(ThisInvitation.FromWho)
                     
     def CourseTeachers(This,Course):
         while True:
-            sqript=f""" select rowid,UserName from Users where exists (select * from Assistants Where Teacher = Users.rowid and Course={str(Course.ID)} And rowid != {str(This.ID)}); """
+            sqript=f""" select rowid,UserName from Users where exists (select * from Assistants Where Teacher = Users.rowid and Course={str(Course.ID)} ) and rowid != {str(This.ID)}; """
             c.execute(sqript)
             Teachers=c.fetchall()
             if len(Teachers)==0:
@@ -956,7 +1018,7 @@ class TeachingAssistants(User):
 
     def CourseAssignments(This,ThisCourse):
         while True:
-            Data=ThisCourse.Assignments()
+            Data =FetchFromData("Assignments","rowid,*" ,2,f"Course = {str(ThisCourse.ID)} ")
             if len(Data)==0:
                 input("Empty")
                 return
@@ -1044,8 +1106,12 @@ class TeachingAssistants(User):
             print(" 3- see InBox")
             print(" 4- See OutBox")
             print(" 5- Logout")
-            Choise=Checker(1,5,10)
+            print(" 6- Delete Account")
+            Choise=Checker(1,6,12)
             if Choise==5:
+                return
+            elif Choise== 6 :
+                This.Delete()
                 return
             elif Choise==4:
                 This.OutBox()
@@ -1071,17 +1137,11 @@ class Invitation:
         This.FromWho=Data[2]
         This.ForCourse=Data[3]
         This.ToWho=Data[4]
+        This.FromName=FetchFromData("Users","UserName" ,1,f"rowid = {str(This.FromWho)}")[0]
+        This.ToName=FetchFromData("Users","UserName" ,1,f"rowid = {str(This.ToWho)}")[0]
         
-        sqript=f"select UserName from Users where rowid = {str(This.FromWho)}"
-        c.execute(sqript)
-        This.FromName=c.fetchone()
-        
-        sqript=f"select UserName from Users where rowid = {str(This.ToWho)}"
-        c.execute(sqript)
-        This.ToName=c.fetchone()
-
     def Viwe(This):
-        print(f"From Professor: {str(This.FromName)}\nFor Course: {str(This.ForCourse)}\nwith Message:\n{str(This.Message)}")
+        print(f"From Professor: {str(This.FromName)}\nTo Teacher: {str(This.ToName)}\nFor Course: {str(This.ForCourse)}\nwith Message:\n{str(This.Message)}")
 
     def Cancle(This):
         sqript=f"""delete from Invitations where rowid = {str(This.ID)}"""
@@ -1089,8 +1149,7 @@ class Invitation:
         conn.commit()
     
     def Confirm(This):
-        Today=datetime.now()
-        sqript=f"""update Asnwers set SubmitDate = "{str(Today)}" where rowid = {str(This.ID)}"""
+        sqript=f"delete from Invitations where rowid ={This.ID}"
         c.execute(sqript)
         conn.commit()
-
+        InsertIntoData("Assistants","Course, Teacher",f"{This.ForCourse},{This.ToWho}")

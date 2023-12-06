@@ -28,8 +28,8 @@ def SetCourses():
     sqript="""create table if not exists Courses(
         Name varchar(50),   
         Description text,
-        CourseProf int,
-        foreign key (CourseProf) references Users(rowid) on delete set null 
+        CourseProf int DEFAULT -1,
+        foreign key (CourseProf) references Users(rowid) on delete set DEFAULT 
     );"""
     c.execute(sqript)
     conn.commit()
@@ -91,8 +91,8 @@ def SetAnswers():
         Student int,
         Assignment int,
         Registration int,
-        SubmitDate varchar(30),
-        Grade decimal default null,
+        SubmitDate varchar(30) default "2000-1-1 00:00:00",
+        Grade decimal default -1,
         GradeMessage Text default null,
         foreign key (Student) references Users(rowid) on delete cascade,
         foreign key (Registration) references Registrations(rowid) on delete cascade,
