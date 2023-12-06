@@ -1,6 +1,6 @@
-##Learn It
+# Learn It
 This is a consol application to make courses py professors and they can send an invitations for Theaching assistants. students can register in that courses and use this app features. the system amde with python3 and sqlite3 database.
-#featurs:
+## featurs:
 <ul>
   <li>you can sign up as a teacher, professor or student and login normaly</li>
   <li>you can send Messages and recive them from/to any user</li>
