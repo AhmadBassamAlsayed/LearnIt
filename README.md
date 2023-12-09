@@ -18,3 +18,9 @@ This is a consol application to make courses py professors and they can send an 
   <li>the professors can delete there courses whin ever thay want</li>
 
 </ul>
+## Notes:
+<div>to run This aplication you have to run "main.py".</div>
+<div>you have to have python3, sqlite3 and datetime library.</div>
+
+## DataBase Diagram:
+![Diagram](Images/databasedaiagram.jpeg "NoTitle")
