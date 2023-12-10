@@ -24,3 +24,8 @@ This is a consol application to make courses py professors and they can send an 
 
 ## DataBase Diagram:
 ![Diagram](Images/databasedaiagram.jpeg "NoTitle")
+
+## ScreenShots:
+![Diagram](Images/Screenshot1.png "NoTitle")
+![Diagram](Images/Screenshot2.png "NoTitle")
+![Diagram](Images/Screenshot3.png "NoTitle")
